@@ -3,7 +3,7 @@
 :filename: CppDocGen.src.io_manager.py
 :author:   Florian Lopitaux
 :version:  0.1
-:summary:  File which manages the I/O interaction with the program.
+:summary:  Manages the I/O interactions with the program.
 
 -------------------------------------------------------------------------
 
@@ -35,11 +35,6 @@ from enum import Enum
 
 # ---------------------------------------------------------------------------
 
-# list which contains all extensions possibles for a c++ file.
-CPP_EXTENSIONS: list[str] = [".h", ".hpp", ".cpp", ".cxx", ".cc", ".c"]
-
-# ---------------------------------------------------------------------------
-
 
 class DocFileCategory(Enum):
     """
@@ -52,6 +47,7 @@ class DocFileCategory(Enum):
     CLASS = "classes"
     FUNCTION = "functions"
     NAMESPACE = "namespaces"
+    ENUM = "enumerations"
 
 
 # ---------------------------------------------------------------------------
@@ -65,10 +61,24 @@ class IOManager:
     """
 
     def __init__(self, input_dir_root: str, output_dir_root: str) -> None:
+        """
+        SUMMARY
+        -------
+            This public method is the constructor of the IOManager class.
+            It searchs all files in the given input directory and initializes the given output directory.
+
+        PARAMETERS
+        ----------
+            - input_dir_root (str): The path of the input directory
+            - output_dir_root (str): The path of the output firectory
+
+        Raises:
+            - FileNotFoundError: If the input directory doesn't exist
+        """
         if not os.path.isdir(input_dir_root):
             raise FileNotFoundError(f"The directory {input_dir_root} doesn't exist !")
 
-        self.__files: list[str] = list()
+        self.__header_files: list[str] = list()
         self.__search_all_files(input_dir_root)
 
         self.__output_dir: str = output_dir_root
@@ -82,14 +92,29 @@ class IOManager:
         """
         SUMMARY
         -------
-            This public method is the getter of the '__files' attribute.
-            It returns the list of all c++ files in the input root directory to process.
+            This public method is the getter of the '__header_files' attribute.
+            It returns the list of all c++ header files in the input root directory to process.
 
         RETURNS
         -------
             list[str]: All c++ files path
         """
-        return self.__files
+        return self.__header_files
+    
+    # ---------------------------------------------------------------------------
+
+    def get_output_path(self) -> str:
+        """
+        SUMMARY
+        -------
+            This public method is the getter of the '__output_dir' attribute.
+            It returns the path of the output documentation directory root.
+
+        RETURNS
+        -------
+            str: The path of the output directory
+        """
+        return self.__output_dir
 
     # ---------------------------------------------------------------------------
     # PUBLIC METHODS
@@ -106,11 +131,11 @@ class IOManager:
             - name (str): The name of the file to create
             - content (str): The markdown content of the file
             - category (DocFileCategory): Optional parameter, the documentation category of the file
-                       By default, The file is create in the root.
+                       By default, The file is create in the root
 
         RAISES
         ------
-            - FileExistsError: Raise if the file to create already exists.
+            - FileExistsError: Raise if the file to create already exists
         """
         if category is None:
             complete_file_path = os.path.join(self.__output_dir, name + ".md")
@@ -131,7 +156,7 @@ class IOManager:
         """
         SUMMARY
         -------
-            This private methods finds all c++ files in the given directory.
+            This private methods finds all c++ header files in the given directory.
 
         PARAMETERS
         ----------
@@ -141,8 +166,8 @@ class IOManager:
             for file in files:
                 _, file_extension: str = os.path.splitext(file)
 
-                if file_extension.lower() in CPP_EXTENSIONS:
-                    self.__files.append(os.path.join(root, files))
+                if file_extension.lower() in (".h", ".hpp"):
+                    self.__header_files.append(os.path.join(root, files))
 
     # ---------------------------------------------------------------------------
 

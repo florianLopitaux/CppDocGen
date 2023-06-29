@@ -28,7 +28,7 @@ This banner notice must not be removed.
 
 -------------------------------------------------------------------------
 
-The script requires a python version superior or equal to 3.11.
+The program requires a python version superior or equal to 3.11 .
 
 """
 
@@ -65,6 +65,5 @@ if __name__ == "__main__":
     args: argparse.Namespace = parser.parse_args()
 
     io_manager: IOManager = IOManager(args.input, args.output)
-
     for file in io_manager.get_files():
         pass

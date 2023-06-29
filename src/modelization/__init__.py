@@ -1,9 +1,9 @@
 # -*- coding: UTF-8 -*-
 """
-:filename: CppDocGen.src.__init__.py
+:filename: CppDocGen.src.modelization.__init__.py
 :author:   Florian Lopitaux
 :version:  0.1
-:summary:  Init file of the 'src' folder to simplify the imports.
+:summary:  Init file of the 'modelization' folder to simplify the imports.
 
 -------------------------------------------------------------------------
 
@@ -38,10 +38,9 @@ if sys.version_info < (3, 11):
 
 # ---------------------------------------------------------------------------
 
-from .io_manager import IOManager, DocFileCategory
+from .enum_desc import EnumDesc
 
 
 __all__ = {
-    "IOManager",
-    "DocFileCategory"
+    "EnumDesc"
 }
