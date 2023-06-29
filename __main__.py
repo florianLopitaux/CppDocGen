@@ -28,10 +28,14 @@ This banner notice must not be removed.
 
 -------------------------------------------------------------------------
 
+The script requires a python version superior or equal to 3.11.
+
 """
 
 import os
 import argparse
+
+from src import IOManager
 
 # ---------------------------------------------------------------------------
 
@@ -59,3 +63,8 @@ if __name__ == "__main__":
     set_program_options(parser)
 
     args: argparse.Namespace = parser.parse_args()
+
+    io_manager: IOManager = IOManager(args.input, args.output)
+
+    for file in io_manager.get_files():
+        pass
