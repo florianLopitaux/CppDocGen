@@ -1,9 +1,9 @@
 # -*- coding: UTF-8 -*-
 """
-:filename: CppDocGen.src.modelization.io_manager.py
+:filename: CppDocGen.src.modelization.enum_desc.py
 :author:   Florian Lopitaux
 :version:  0.1
-:summary:  Describes an enumeration in the code.
+:summary:  Describes an enumeration of the code.
 
 -------------------------------------------------------------------------
 
@@ -36,7 +36,13 @@ from src import DocFileCategory
 
 # ---------------------------------------------------------------------------
 
+
 class EnumDesc:
+    """
+    SUMMARY
+    -------
+        This class is described an enumeration of the code.
+    """
     
     def __init__(self, name: str, summary: list[str], items: dict[str, object] = None) -> None:
         """
@@ -50,12 +56,12 @@ class EnumDesc:
             - summary (list[str]): The description (@brief) of the enum
             - items (dict[str, object]): Optional parameter, the items of the enum
         """
-        if values is None:
-            values = list()
+        if items is None:
+            items = list()
 
-        self.__name = name
-        self.__summary = summary
-        self.__items = items
+        self.__name: str = name
+        self.__summary: list[str] = summary
+        self.__items: dict[str, object] = items
     
     # ---------------------------------------------------------------------------
     # GETTERS
@@ -149,18 +155,25 @@ class EnumDesc:
         -------
             This public method generates markdown to describe this enum.
 
+        PARAMETERS
+        ----------
+            - output (str): The path of the output documentation directory
+            - file_container (str) The name of the file that contains this enum 
+
         RETURNS
         -------
-            list[str]: The lines of the markdown generated.
+            list[str]: The lines of the markdown generated
         """
         lines: list[str] = list()
-
-        lines.append(f"# (enum) {self.__name}")
-        lines.extend(self.__summary)
+        lines.append(f"# {self.__name} - (enum)")
         lines.append("")
+
+        for line in self.__summary:
+            lines.append(f"> {line}")
+        lines.append("")
+
         lines.append(f"## Items")
         lines.append("")
-
         lines.append("| ITEM | VALUE |")
         lines.append("|------|-------|")
 
@@ -169,7 +182,6 @@ class EnumDesc:
 
         lines.append("")
         lines.append("## Location")
-        lines.append("")
 
         doc_file_path = os.path.join(output, DocFileCategory.FILE.value, file_container + ".md")
         lines.append(f"[{file_container}]({doc_file_path})")
