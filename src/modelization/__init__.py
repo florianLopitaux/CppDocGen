@@ -38,14 +38,16 @@ if sys.version_info < (3, 11):
 
 # ---------------------------------------------------------------------------
 
-from .tag import Tag, TagKeys
+from .tags import TagKeys, Tag, TypedTag, ParameterTag
 from .enum_desc import EnumDesc
 from .function_desc import FunctionDesc
 
 
 __all__ = {
-    "Tag",
     "TagKeys",
+    "Tag",
+    "TypedTag",
+    "ParameterTag",
     "EnumDesc",
     "FunctionDesc"
 }

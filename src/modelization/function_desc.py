@@ -34,7 +34,7 @@ import os
 import copy
 
 from src import DocFileCategory
-from .tag import Tag
+from .tags import TypedTag, ParameterTag
 
 # ---------------------------------------------------------------------------
 
@@ -46,14 +46,26 @@ class FunctionDesc:
         This class is described a function of the code.
     """
 
-    def __init__(self, name: str, declare_code_line: str, return_tag: Tag = None) -> None:
-        self.__name: str = name
-        self.__code_line = declare_code_line
+    def __init__(self, name: str, declare_code_line: str,
+                 summary: list[str] = None, return_tag: TypedTag = None,
+                 parameters: list[ParameterTag] = None, exceptions: list[TypedTag] = None) -> None:
 
-        self.__summary: list[str] = list()
-        self.__parameters: list[Tag] = list()
-        self.__raises: list[Tag] = list()
-        self.__return: Tag = return_tag
+        if summary is None:
+            summary = list()
+
+        if parameters is None:
+            parameters = list()
+
+        if exceptions is None:
+            exceptions = list()
+
+        self.__name: str = name
+        self.__code_line: str = declare_code_line
+
+        self.__summary: list[str] = summary
+        self.__parameters: list[ParameterTag] = parameters
+        self.__exceptions: list[TypedTag] = exceptions
+        self.__return: TypedTag | None = return_tag
 
     # ---------------------------------------------------------------------------
     # GETTERS
@@ -69,27 +81,36 @@ class FunctionDesc:
 
     # ---------------------------------------------------------------------------
 
-    def get_parameters(self) -> list[Tag]:
+    def get_parameters(self) -> list[ParameterTag]:
         return copy.deepcopy(self.__parameters)
-    
+
     # ---------------------------------------------------------------------------
 
-    def get_parameter(self, name: str) -> Tag | None:
+    def get_parameter(self, name: str) -> ParameterTag | None:
         for param in self.__parameters:
             if param.get_name() == name:
-                return param.copy()
+                return copy.copy(param)
         
         return None
     
     # ---------------------------------------------------------------------------
 
-    def get_raises(self) -> list[Tag]:
-        return copy.deepcopy(self.__raises)
+    def get_throws(self) -> list[TypedTag]:
+        return copy.deepcopy(self.__exceptions)
 
     # ---------------------------------------------------------------------------
 
-    def get_return_tag(self) -> Tag:
-        return self.__return.copy()
+    def get_throw(self, exception: str) -> TypedTag | None:
+        for exception in self.__exceptions:
+            if exception.get_type() == exception:
+                return copy.copy(exception)
+
+        return None
+
+    # ---------------------------------------------------------------------------
+
+    def get_return_tag(self) -> TypedTag | None:
+        return copy.copy(self.__return)
 
     # ---------------------------------------------------------------------------
     # SETTERS
@@ -105,21 +126,27 @@ class FunctionDesc:
 
     # ---------------------------------------------------------------------------
 
-    def add_parameters(self, parameters: list[Tag]) -> None:
+    def add_parameters(self, parameters: list[ParameterTag]) -> None:
+        if any(not isinstance(current, ParameterTag) for current in parameters):
+            raise ValueError(f"The 'parameters' parameter must be contain only 'ParameterTag' instances !\Variable : {parameters}")
+
         self.__parameters.extend(parameters)
 
     # ---------------------------------------------------------------------------
 
-    def add_exceptions(self, exceptions: list[Tag]) -> None:
-        self.__raises.extend(exceptions)
+    def add_exceptions(self, exceptions: list[TypedTag]) -> None:
+        if any(not isinstance(current, TypedTag) for current in exceptions):
+            raise ValueError(f"The 'exceptions' parameter must be contain only 'TypedTag' instances !\Variable : {exceptions}")
+
+        self.__exceptions.extend(exceptions)
 
     # ---------------------------------------------------------------------------
 
-    def set_return_tag(self, return_tag: Tag) -> None:
-        if isinstance(return_tag, Tag):
+    def set_return_tag(self, return_tag: TypedTag) -> None:
+        if isinstance(return_tag, TypedTag):
             self.__return = return_tag
         else:
-            raise ValueError(f"The 'return_tag' parameter must be a 'Tag' instance and not '{type(return_tag)}' !")
+            raise ValueError(f"The 'return_tag' parameter must be a 'TypedTag' instance and not '{type(return_tag)}' !")
 
     # ---------------------------------------------------------------------------
     # PUBLIC METHODS
@@ -159,7 +186,7 @@ class FunctionDesc:
         lines.append("|------|------|-------|-------------|")
 
         for param in self.__parameters:
-            lines.append(f"| {param.get_name()} | {param.get_type()} | {param.get_hints()} | {param.get_description()} |")
+            lines.append(f"| {param.get_name()} | {param.get_type()} | {param.get_hints()} | {param.get_value()} |")
 
         lines.append("")
         lines.append("## Raises")
@@ -168,7 +195,7 @@ class FunctionDesc:
         lines.append("|-----------|-------------|")
 
         for exception in self.__raises:
-            lines.append(f"| {exception.get_name()} | {exception.get_description()} |")
+            lines.append(f"| {exception.get_type()} | {exception.get_value()} |")
 
         lines.append("")
         lines.append("## Returns")
@@ -176,7 +203,7 @@ class FunctionDesc:
 
         lines.append("| TYPE | DESCRIPTION |")
         lines.append("|------|-------------|")
-        lines.append(f"| {self.__return.get_type()} | {self.__return.get_description()} |")
+        lines.append(f"| {self.__return.get_type()} | {self.__return.get_value()} |")
         lines.append("")
 
         lines.append("## Location")
